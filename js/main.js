@@ -816,9 +816,9 @@ function initQuickViewModal() {
             image: 'https://images.unsplash.com/photo-1626200419199-391ae4be7a41?w=600'
         },
         4: {
-            name: 'Wagyu Ribeye Steak',
+            name: 'Fry Momo',
             category: 'Main Course',
-            price: 38.99,
+            price: 90,
             rating: 4.9,
             description: 'Premium A5 Wagyu beef, grilled to your preference, served with truffle mashed potatoes, seasonal vegetables, and red wine reduction.',
             time: '25 min',
@@ -876,9 +876,9 @@ function initQuickViewModal() {
             image: 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=600'
         },
         9: {
-            name: 'Butter Poached Lobster',
+            name: 'Schezwan Fried Rice',
             category: 'Seafood',
-            price: 58.99,
+            price: 140,
             rating: 5.0,
             description: 'Maine lobster tail gently poached in herb butter, served with drawn butter, grilled lemon, and seasonal sides.',
             time: '25 min',
@@ -888,9 +888,9 @@ function initQuickViewModal() {
             image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600'
         },
         10: {
-            name: 'Premium Sushi Platter',
+            name: 'Veg Lollipop',
             category: 'Seafood',
-            price: 42.99,
+            price: 200,
             rating: 4.9,
             description: 'Chef\'s selection of 12 premium nigiri pieces featuring fresh salmon, tuna, yellowtail, and seasonal fish.',
             time: '15 min',
@@ -900,9 +900,9 @@ function initQuickViewModal() {
             image: 'https://images.unsplash.com/photo-1579631542720-3a87824fff86?w=600'
         },
         11: {
-            name: 'Chocolate Lava Cake',
+            name: 'Singapuri Noodles',
             category: 'Desserts',
-            price: 14.99,
+            price: 140,
             rating: 5.0,
             description: 'Warm chocolate cake with a molten center, served with vanilla bean ice cream and fresh berries.',
             time: '12 min',
@@ -948,9 +948,9 @@ function initQuickViewModal() {
             image: 'https://images.unsplash.com/photo-1510626176961-4b57d4fbad03?w=600'
         },
         15: {
-            name: 'Signature Royale Martini',
+            name: 'Veg Machurian',
             category: 'Drinks',
-            price: 15.99,
+            price: 199,
             rating: 4.8,
             description: 'House special cocktail with premium vodka, elderflower liqueur, and a splash of champagne.',
             time: '5 min',
