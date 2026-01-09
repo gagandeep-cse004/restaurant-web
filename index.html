@@ -154,7 +154,7 @@
             margin-bottom: 30px;
         }
 
-       
+
 
         .confirmation-item i {
             color: #667eea;
@@ -3633,8 +3633,7 @@
                             <h4>Paneer 65</h4>
                             <p class="quick-item-price">₹230</p>
                         </div>
-                        <button class="quick-add-btn" data-id="15" data-name="Signature Royale Martini"
-                            data-price="230"
+                        <button class="quick-add-btn" data-id="15" data-name="Signature Royale Martini" data-price="230"
                             data-image="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=200">
                             <i class="fas fa-plus"></i>
                         </button>
@@ -3836,7 +3835,7 @@
                                 Payment Method
                             </h3>
                             <div class="payment-options">
-                                
+
                                 <label class="payment-option">
                                     <input type="radio" id="payment-cash" name="payment" value="cash">
                                     <span class="payment-card">
@@ -3846,8 +3845,8 @@
                                 </label>
                             </div>
 
-                            
-                            
+
+
                         </div>
 
                         <!-- Tip Section -->
@@ -5371,663 +5370,311 @@
 
     <script>
         // ============================================
-            // RESTAURANT FORMS - ORDERS & RESERVATIONS
+        // RESTAURANT FORMS - ORDERS & RESERVATIONS
+        // ============================================
+
+        (function () {
+            'use strict';
+
+            // ⚠️ CHANGE THIS TO YOUR WEB APP URL ⚠️
+            var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxg-RwuN4jLSMMNaYFLiQ4cXYbPbxYpPfkBvqAhXap27OYnpqkbc4jcom6s2-aV8O2yRA/exec';
+
+            // ============================================
+            // UTILITY FUNCTIONS
             // ============================================
 
-            (function () {
-                'use strict';
-
-                // ⚠️ CHANGE THIS TO YOUR WEB APP URL ⚠️
-                var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxg-RwuN4jLSMMNaYFLiQ4cXYbPbxYpPfkBvqAhXap27OYnpqkbc4jcom6s2-aV8O2yRA/exec';
-
-                // ============================================
-                // UTILITY FUNCTIONS
-                // ============================================
-
-                function showToast(message, type) {
-                    // Remove existing toast
-                    var existing = document.querySelector('.toast-notification');
-                    if (existing) existing.remove();
-
-                    var toast = document.createElement('div');
-                    toast.className = 'toast-notification ' + (type || 'info');
-                    toast.innerHTML = '<span>' + message + '</span><button onclick="this.parentElement.remove()">&times;</button>';
-                    document.body.appendChild(toast);
-
-                    setTimeout(function () { toast.classList.add('show'); }, 100);
-                    setTimeout(function () {
-                        toast.classList.remove('show');
-                        setTimeout(function () { toast.remove(); }, 300);
-                    }, 4000);
-                }
-
-                function generateId(prefix) {
-                    return prefix + '-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
-                }
-
-                // ============================================
-                // RESERVATION FORM
-                // ============================================
-
-                var ReservationHandler = {
-                    form: null,
-                    currentStep: 1,
-                    selectedDate: null,
-                    selectedTime: null,
-                    guestCount: 2,
-                    currentMonth: new Date(),
-
-                    init: function () {
-                        this.form = document.getElementById('reservationForm');
-                        if (!this.form) return;
-
-                        this.initCalendar();
-                        this.initTimeSlots();
-                        this.initGuestSelector();
-                        this.initNavigation();
-                        this.initSubmit();
-                    },
-
-                    // Calendar
-                    initCalendar: function () {
-                        var self = this;
-
-                        var prevBtn = document.getElementById('prevMonth');
-                        var nextBtn = document.getElementById('nextMonth');
-
-                        if (prevBtn) {
-                            prevBtn.onclick = function () {
-                                self.currentMonth.setMonth(self.currentMonth.getMonth() - 1);
-                                self.renderCalendar();
-                            };
-                        }
-
-                        if (nextBtn) {
-                            nextBtn.onclick = function () {
-                                self.currentMonth.setMonth(self.currentMonth.getMonth() + 1);
-                                self.renderCalendar();
-                            };
-                        }
-
-                        this.renderCalendar();
-                    },
-
-                    renderCalendar: function () {
-                        var self = this;
-                        var year = this.currentMonth.getFullYear();
-                        var month = this.currentMonth.getMonth();
-
-                        var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                            'July', 'August', 'September', 'October', 'November', 'December'];
-
-                        var monthDisplay = document.getElementById('currentMonth');
-                        if (monthDisplay) {
-                            monthDisplay.textContent = monthNames[month] + ' ' + year;
-                        }
-
-                        var firstDay = new Date(year, month, 1).getDay();
-                        var daysInMonth = new Date(year, month + 1, 0).getDate();
-                        var today = new Date();
-                        today.setHours(0, 0, 0, 0);
-
-                        var calendarDays = document.getElementById('calendarDays');
-                        if (!calendarDays) return;
-
-                        calendarDays.innerHTML = '';
-
-                        // Empty days
-                        for (var i = 0; i < firstDay; i++) {
-                            var empty = document.createElement('span');
-                            empty.className = 'calendar-day empty';
-                            calendarDays.appendChild(empty);
-                        }
-
-                        // Actual days
-                        for (var day = 1; day <= daysInMonth; day++) {
-                            var dayEl = document.createElement('span');
-                            dayEl.className = 'calendar-day';
-                            dayEl.textContent = day;
-
-                            var dateCheck = new Date(year, month, day);
-
-                            if (dateCheck < today) {
-                                dayEl.classList.add('disabled');
-                            } else {
-                                (function (d, y, m, el) {
-                                    el.onclick = function () {
-                                        self.selectDate(y, m, d, el);
-                                    };
-                                })(day, year, month, dayEl);
-                            }
-
-                            if (this.selectedDate &&
-                                this.selectedDate.getFullYear() === year &&
-                                this.selectedDate.getMonth() === month &&
-                                this.selectedDate.getDate() === day) {
-                                dayEl.classList.add('selected');
-                            }
-
-                            if (dateCheck.getTime() === today.getTime()) {
-                                dayEl.classList.add('today');
-                            }
-
-                            calendarDays.appendChild(dayEl);
-                        }
-                    },
-
-                    selectDate: function (year, month, day, element) {
-                        var allDays = document.querySelectorAll('.calendar-day');
-                        for (var i = 0; i < allDays.length; i++) {
-                            allDays[i].classList.remove('selected');
-                        }
-
-                        element.classList.add('selected');
-                        this.selectedDate = new Date(year, month, day);
-
-                        var dateInput = document.getElementById('selectedDate');
-                        if (dateInput) {
-                            dateInput.value = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-                        }
-                    },
-
-                    getFormattedDate: function () {
-                        if (!this.selectedDate) return '';
-                        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                        return this.selectedDate.toLocaleDateString('en-US', options);
-                    },
-
-                    // Time Slots
-                    initTimeSlots: function () {
-                        var self = this;
-                        var slots = document.querySelectorAll('.time-slot:not(.unavailable)');
-
-                        for (var i = 0; i < slots.length; i++) {
-                            (function (slot) {
-                                slot.onclick = function () {
-                                    var allSlots = document.querySelectorAll('.time-slot');
-                                    for (var j = 0; j < allSlots.length; j++) {
-                                        allSlots[j].classList.remove('selected');
-                                    }
-
-                                    slot.classList.add('selected');
-                                    self.selectedTime = slot.getAttribute('data-time');
-
-                                    var timeInput = document.getElementById('selectedTime');
-                                    if (timeInput) {
-                                        timeInput.value = self.selectedTime;
-                                    }
-                                };
-                            })(slots[i]);
-                        }
-                    },
-
-                    getFormattedTime: function () {
-                        var slot = document.querySelector('.time-slot.selected');
-                        return slot ? slot.textContent.trim() : '';
-                    },
-
-                    // Guest Selector
-                    initGuestSelector: function () {
-                        var self = this;
-
-                        var minusBtn = document.getElementById('guestMinus');
-                        var plusBtn = document.getElementById('guestPlus');
-
-                        if (minusBtn) {
-                            minusBtn.onclick = function () {
-                                if (self.guestCount > 1) {
-                                    self.guestCount--;
-                                    self.updateGuestDisplay();
-                                }
-                            };
-                        }
-
-                        if (plusBtn) {
-                            plusBtn.onclick = function () {
-                                if (self.guestCount < 20) {
-                                    self.guestCount++;
-                                    self.updateGuestDisplay();
-                                }
-                            };
-                        }
-                    },
-
-                    updateGuestDisplay: function () {
-                        var display = document.getElementById('guestNumber');
-                        var input = document.getElementById('selectedGuests');
-
-                        if (display) display.textContent = this.guestCount;
-                        if (input) input.value = this.guestCount;
-                    },
-
-                    // Navigation
-                    initNavigation: function () {
-                        var self = this;
-
-                        var nextBtns = document.querySelectorAll('.btn-next');
-                        var prevBtns = document.querySelectorAll('.btn-prev');
-
-                        for (var i = 0; i < nextBtns.length; i++) {
-                            (function (btn) {
-                                btn.onclick = function () {
-                                    var nextStep = parseInt(btn.getAttribute('data-next'));
-                                    if (self.validateStep(self.currentStep)) {
-                                        self.goToStep(nextStep);
-                                    }
-                                };
-                            })(nextBtns[i]);
-                        }
-
-                        for (var j = 0; j < prevBtns.length; j++) {
-                            (function (btn) {
-                                btn.onclick = function () {
-                                    var prevStep = parseInt(btn.getAttribute('data-prev'));
-                                    self.goToStep(prevStep);
-                                };
-                            })(prevBtns[j]);
-                        }
-                    },
-
-                    validateStep: function (step) {
-                        if (step === 1) {
-                            if (!this.selectedDate) {
-                                showToast('Please select a date', 'error');
-                                return false;
-                            }
-                            if (!this.selectedTime) {
-                                showToast('Please select a time', 'error');
-                                return false;
-                            }
-                            return true;
-                        }
-
-                        if (step === 2) {
-                            var firstName = document.getElementById('firstName');
-                            var lastName = document.getElementById('lastName');
-                            var email = document.getElementById('email');
-                            var phone = document.getElementById('phone');
-
-                            var valid = true;
-
-                            if (!firstName || !firstName.value.trim()) {
-                                firstName.classList.add('error');
-                                valid = false;
-                            } else {
-                                firstName.classList.remove('error');
-                            }
-
-                            if (!lastName || !lastName.value.trim()) {
-                                lastName.classList.add('error');
-                                valid = false;
-                            } else {
-                                lastName.classList.remove('error');
-                            }
-
-                            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                            if (!email || !email.value.trim() || !emailRegex.test(email.value)) {
-                                email.classList.add('error');
-                                valid = false;
-                            } else {
-                                email.classList.remove('error');
-                            }
-
-                            if (!phone || !phone.value.trim() || phone.value.length < 10) {
-                                phone.classList.add('error');
-                                valid = false;
-                            } else {
-                                phone.classList.remove('error');
-                            }
-
-                            if (!valid) {
-                                showToast('Please fill all required fields', 'error');
-                            }
-
-                            return valid;
-                        }
-
-                        return true;
-                    },
-
-                    goToStep: function (step) {
-                        var steps = document.querySelectorAll('.form-step');
-                        for (var i = 0; i < steps.length; i++) {
-                            steps[i].classList.remove('active');
-                        }
-
-                        var targetStep = document.getElementById('step' + step);
-                        if (targetStep) {
-                            targetStep.classList.add('active');
-                        }
-
-                        var progressSteps = document.querySelectorAll('.progress-step');
-                        for (var j = 0; j < progressSteps.length; j++) {
-                            var stepNum = parseInt(progressSteps[j].getAttribute('data-step'));
-                            progressSteps[j].classList.remove('active', 'completed');
-
-                            if (stepNum < step) {
-                                progressSteps[j].classList.add('completed');
-                            } else if (stepNum === step) {
-                                progressSteps[j].classList.add('active');
-                            }
-                        }
-
-                        this.currentStep = step;
-
-                        if (step === 3) {
-                            this.updateSummary();
-                        }
-
-                        this.form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    },
-
-                    updateSummary: function () {
-                        var firstName = document.getElementById('firstName');
-                        var lastName = document.getElementById('lastName');
-                        var email = document.getElementById('email');
-                        var phone = document.getElementById('phone');
-                        var occasion = document.querySelector('input[name="occasion"]:checked');
-                        var requests = document.getElementById('specialRequests');
-
-                        var summaryDate = document.getElementById('summaryDate');
-                        var summaryTime = document.getElementById('summaryTime');
-                        var summaryGuests = document.getElementById('summaryGuests');
-                        var summaryName = document.getElementById('summaryName');
-                        var summaryEmail = document.getElementById('summaryEmail');
-                        var summaryPhone = document.getElementById('summaryPhone');
-                        var summaryOccasion = document.getElementById('summaryOccasion');
-                        var summaryOccasionWrap = document.getElementById('summaryOccasionWrap');
-                        var summaryRequests = document.getElementById('summaryRequests');
-                        var summaryRequestsWrap = document.getElementById('summaryRequestsWrap');
-
-                        if (summaryDate) summaryDate.textContent = this.getFormattedDate();
-                        if (summaryTime) summaryTime.textContent = this.getFormattedTime();
-                        if (summaryGuests) summaryGuests.textContent = this.guestCount + ' Guest(s)';
-                        if (summaryName) summaryName.textContent = (firstName ? firstName.value : '') + ' ' + (lastName ? lastName.value : '');
-                        if (summaryEmail) summaryEmail.textContent = email ? email.value : '';
-                        if (summaryPhone) summaryPhone.textContent = phone ? phone.value : '';
-
-                        if (summaryOccasionWrap && summaryOccasion) {
-                            if (occasion && occasion.value !== 'none') {
-                                summaryOccasionWrap.style.display = 'flex';
-                                summaryOccasion.textContent = occasion.value.charAt(0).toUpperCase() + occasion.value.slice(1);
-                            } else {
-                                summaryOccasionWrap.style.display = 'none';
-                            }
-                        }
-
-                        if (summaryRequestsWrap && summaryRequests) {
-                            if (requests && requests.value.trim()) {
-                                summaryRequestsWrap.style.display = 'flex';
-                                summaryRequests.textContent = requests.value;
-                            } else {
-                                summaryRequestsWrap.style.display = 'none';
-                            }
-                        }
-                    },
-
-                    // Submit
-                    initSubmit: function () {
-                        var self = this;
-
-                        this.form.onsubmit = function (e) {
-                            e.preventDefault();
-
-                            var termsCheckbox = document.getElementById('termsAgree');
-                            if (termsCheckbox && !termsCheckbox.checked) {
-                                showToast('Please agree to the terms', 'error');
-                                return;
-                            }
-
-                            self.submitReservation();
+            function showToast(message, type) {
+                // Remove existing toast
+                var existing = document.querySelector('.toast-notification');
+                if (existing) existing.remove();
+
+                var toast = document.createElement('div');
+                toast.className = 'toast-notification ' + (type || 'info');
+                toast.innerHTML = '<span>' + message + '</span><button onclick="this.parentElement.remove()">&times;</button>';
+                document.body.appendChild(toast);
+
+                setTimeout(function () { toast.classList.add('show'); }, 100);
+                setTimeout(function () {
+                    toast.classList.remove('show');
+                    setTimeout(function () { toast.remove(); }, 300);
+                }, 4000);
+            }
+
+            function generateId(prefix) {
+                return prefix + '-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+            }
+
+            // ============================================
+            // RESERVATION FORM
+            // ============================================
+
+            var ReservationHandler = {
+                form: null,
+                currentStep: 1,
+                selectedDate: null,
+                selectedTime: null,
+                guestCount: 2,
+                currentMonth: new Date(),
+
+                init: function () {
+                    this.form = document.getElementById('reservationForm');
+                    if (!this.form) return;
+
+                    this.initCalendar();
+                    this.initTimeSlots();
+                    this.initGuestSelector();
+                    this.initNavigation();
+                    this.initSubmit();
+                },
+
+                // Calendar
+                initCalendar: function () {
+                    var self = this;
+
+                    var prevBtn = document.getElementById('prevMonth');
+                    var nextBtn = document.getElementById('nextMonth');
+
+                    if (prevBtn) {
+                        prevBtn.onclick = function () {
+                            self.currentMonth.setMonth(self.currentMonth.getMonth() - 1);
+                            self.renderCalendar();
                         };
-                    },
-
-                    submitReservation: function () {
-                        var self = this;
-
-                        var submitBtn = this.form.querySelector('.btn-submit');
-                        if (submitBtn) {
-                            submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-                        }
-
-                        var firstName = document.getElementById('firstName');
-                        var lastName = document.getElementById('lastName');
-                        var email = document.getElementById('email');
-                        var phone = document.getElementById('phone');
-                        var occasion = document.querySelector('input[name="occasion"]:checked');
-                        var requests = document.getElementById('specialRequests');
-
-                        var data = {
-                            type: 'reservation',
-                            data: {
-                                date: document.getElementById('selectedDate') ? document.getElementById('selectedDate').value : '',
-                                dateFormatted: this.getFormattedDate(),
-                                time: this.selectedTime,
-                                timeFormatted: this.getFormattedTime(),
-                                guests: this.guestCount,
-                                firstName: firstName ? firstName.value.trim() : '',
-                                lastName: lastName ? lastName.value.trim() : '',
-                                email: email ? email.value.trim() : '',
-                                phone: phone ? phone.value.trim() : '',
-                                occasion: occasion ? occasion.value : 'none',
-                                specialRequests: requests ? requests.value.trim() : ''
-                            }
-                        };
-
-                        fetch(GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(data)
-                        })
-                            .then(function () {
-                                self.showSuccess(data.data);
-                            })
-                            .catch(function (error) {
-                                console.error('Error:', error);
-                                showToast('Failed to submit. Please try again.', 'error');
-                                if (submitBtn) {
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Reservation';
-                                }
-                            });
-                    },
-
-                    showSuccess: function (data) {
-                        var reservationId = generateId('RES');
-
-                        this.form.innerHTML = '' +
-                            '<div class="confirmation-success">' +
-                            '<div class="success-icon-wrap">' +
-                            '<div class="success-icon"><i class="fas fa-check"></i></div>' +
-                            '</div>' +
-                            '<h2>Reservation Confirmed!</h2>' +
-                            '<p>Thank you, ' + data.firstName + '!</p>' +
-                            '<div class="confirmation-id">' +
-                            '<small style="color:black;">  Reservation ID</small>' +
-                            '<strong>' + reservationId + '</strong>' +
-                            '</div>' +
-                            '<div class="confirmation-details">' +
-                            '<div class="conf-item"><i class="fas fa-calendar"></i><span>' + data.dateFormatted + '</span></div>' +
-                            '<div class="conf-item"><i class="fas fa-clock"></i><span>' + data.timeFormatted + '</span></div>' +
-                            '<div class="conf-item"><i class="fas fa-users"></i><span>' + data.guests + ' Guest(s)</span></div>' +
-                            '</div>' +
-                            '<div class="confirmation-email">' +
-                            '<i class="fas fa-envelope"></i>' +
-                            '<p>Confirmation sent to <strong>' + data.email + '</strong></p>' +
-                            '</div>' +
-                            '<button class="btn btn-primary" onclick="location.reload()">' +
-                            '<i class="fas fa-plus"></i> New Reservation' +
-                            '</button>' +
-                            '</div>';
-
-                        showToast('Reservation submitted successfully!', 'success');
                     }
-                };
 
-                // ============================================
-                // CHECKOUT/ORDER FORM
-                // ============================================
+                    if (nextBtn) {
+                        nextBtn.onclick = function () {
+                            self.currentMonth.setMonth(self.currentMonth.getMonth() + 1);
+                            self.renderCalendar();
+                        };
+                    }
 
-                var CheckoutHandler = {
-                    form: null,
-                    cartItems: [],
-                    tipPercent: 15,
-                    customTip: 0,
+                    this.renderCalendar();
+                },
 
-                    init: function () {
-                        this.form = document.getElementById('checkoutForm');
-                        if (!this.form) return;
+                renderCalendar: function () {
+                    var self = this;
+                    var year = this.currentMonth.getFullYear();
+                    var month = this.currentMonth.getMonth();
 
-                        this.loadCart();
-                        this.initPayment();
-                        this.initTip();
-                        this.initSubmit();
-                        this.updateTotals();
-                    },
+                    var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
 
-                    loadCart: function () {
-                        var saved = localStorage.getItem('cartItems');
-                        if (saved) {
-                            try {
-                                this.cartItems = JSON.parse(saved);
-                            } catch (e) {
-                                this.cartItems = [];
-                            }
+                    var monthDisplay = document.getElementById('currentMonth');
+                    if (monthDisplay) {
+                        monthDisplay.textContent = monthNames[month] + ' ' + year;
+                    }
+
+                    var firstDay = new Date(year, month, 1).getDay();
+                    var daysInMonth = new Date(year, month + 1, 0).getDate();
+                    var today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    var calendarDays = document.getElementById('calendarDays');
+                    if (!calendarDays) return;
+
+                    calendarDays.innerHTML = '';
+
+                    // Empty days
+                    for (var i = 0; i < firstDay; i++) {
+                        var empty = document.createElement('span');
+                        empty.className = 'calendar-day empty';
+                        calendarDays.appendChild(empty);
+                    }
+
+                    // Actual days
+                    for (var day = 1; day <= daysInMonth; day++) {
+                        var dayEl = document.createElement('span');
+                        dayEl.className = 'calendar-day';
+                        dayEl.textContent = day;
+
+                        var dateCheck = new Date(year, month, day);
+
+                        if (dateCheck < today) {
+                            dayEl.classList.add('disabled');
+                        } else {
+                            (function (d, y, m, el) {
+                                el.onclick = function () {
+                                    self.selectDate(y, m, d, el);
+                                };
+                            })(day, year, month, dayEl);
                         }
-                    },
 
-                    getSubtotal: function () {
-                        var total = 0;
-                        for (var i = 0; i < this.cartItems.length; i++) {
-                            var item = this.cartItems[i];
-                            total += (item.price || 0) * (item.quantity || 1);
+                        if (this.selectedDate &&
+                            this.selectedDate.getFullYear() === year &&
+                            this.selectedDate.getMonth() === month &&
+                            this.selectedDate.getDate() === day) {
+                            dayEl.classList.add('selected');
                         }
-                        return total;
-                    },
 
-                    getDeliveryFee: function () {
-                        return this.getSubtotal() >= 500 ? 0 : 50;
-                    },
-
-                    getTax: function () {
-                        return this.getSubtotal() * 0.05;
-                    },
-
-                    getTip: function () {
-                        if (this.tipPercent === 'custom') {
-                            return this.customTip || 0;
+                        if (dateCheck.getTime() === today.getTime()) {
+                            dayEl.classList.add('today');
                         }
-                        return this.getSubtotal() * (this.tipPercent / 100);
-                    },
 
-                    getTotal: function () {
-                        return this.getSubtotal() + this.getDeliveryFee() + this.getTax() + this.getTip();
-                    },
+                        calendarDays.appendChild(dayEl);
+                    }
+                },
 
-                    updateTotals: function () {
-                        var subtotalEl = document.getElementById('subtotalAmount');
-                        var deliveryEl = document.getElementById('deliveryAmount');
-                        var taxEl = document.getElementById('taxAmount');
-                        var tipEl = document.getElementById('tipAmount');
-                        var totalEl = document.getElementById('totalAmount');
+                selectDate: function (year, month, day, element) {
+                    var allDays = document.querySelectorAll('.calendar-day');
+                    for (var i = 0; i < allDays.length; i++) {
+                        allDays[i].classList.remove('selected');
+                    }
 
-                        if (subtotalEl) subtotalEl.textContent = '₹' + this.getSubtotal().toFixed(2);
-                        if (deliveryEl) deliveryEl.textContent = this.getDeliveryFee() === 0 ? 'FREE' : '₹' + this.getDeliveryFee().toFixed(2);
-                        if (taxEl) taxEl.textContent = '₹' + this.getTax().toFixed(2);
-                        if (tipEl) tipEl.textContent = '₹' + this.getTip().toFixed(2);
-                        if (totalEl) totalEl.textContent = '₹' + this.getTotal().toFixed(2);
-                    },
+                    element.classList.add('selected');
+                    this.selectedDate = new Date(year, month, day);
 
-                    initPayment: function () {
-                        var options = document.querySelectorAll('input[name="payment"]');
+                    var dateInput = document.getElementById('selectedDate');
+                    if (dateInput) {
+                        dateInput.value = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+                    }
+                },
 
-                        for (var i = 0; i < options.length; i++) {
-                            options[i].onchange = function (e) {
-                                var allOptions = document.querySelectorAll('.payment-option');
-                                for (var j = 0; j < allOptions.length; j++) {
-                                    allOptions[j].classList.remove('active');
+                getFormattedDate: function () {
+                    if (!this.selectedDate) return '';
+                    var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                    return this.selectedDate.toLocaleDateString('en-US', options);
+                },
+
+                // Time Slots
+                initTimeSlots: function () {
+                    var self = this;
+                    var slots = document.querySelectorAll('.time-slot:not(.unavailable)');
+
+                    for (var i = 0; i < slots.length; i++) {
+                        (function (slot) {
+                            slot.onclick = function () {
+                                var allSlots = document.querySelectorAll('.time-slot');
+                                for (var j = 0; j < allSlots.length; j++) {
+                                    allSlots[j].classList.remove('selected');
                                 }
 
-                                var parent = e.target.closest('.payment-option');
-                                if (parent) parent.classList.add('active');
+                                slot.classList.add('selected');
+                                self.selectedTime = slot.getAttribute('data-time');
+
+                                var timeInput = document.getElementById('selectedTime');
+                                if (timeInput) {
+                                    timeInput.value = self.selectedTime;
+                                }
                             };
-                        }
-                    },
+                        })(slots[i]);
+                    }
+                },
 
-                    initTip: function () {
-                        var self = this;
-                        var tipBtns = document.querySelectorAll('.tip-btn');
-                        var customTipDiv = document.getElementById('customTip');
-                        var customTipInput = document.getElementById('customTipAmount');
+                getFormattedTime: function () {
+                    var slot = document.querySelector('.time-slot.selected');
+                    return slot ? slot.textContent.trim() : '';
+                },
 
-                        for (var i = 0; i < tipBtns.length; i++) {
-                            (function (btn) {
-                                btn.onclick = function () {
-                                    for (var j = 0; j < tipBtns.length; j++) {
-                                        tipBtns[j].classList.remove('active');
-                                    }
-                                    btn.classList.add('active');
+                // Guest Selector
+                initGuestSelector: function () {
+                    var self = this;
 
-                                    var tipVal = btn.getAttribute('data-tip');
+                    var minusBtn = document.getElementById('guestMinus');
+                    var plusBtn = document.getElementById('guestPlus');
 
-                                    if (tipVal === 'custom') {
-                                        if (customTipDiv) customTipDiv.style.display = 'block';
-                                        self.tipPercent = 'custom';
-                                    } else {
-                                        if (customTipDiv) customTipDiv.style.display = 'none';
-                                        self.tipPercent = parseInt(tipVal) || 0;
-                                        self.customTip = 0;
-                                    }
+                    if (minusBtn) {
+                        minusBtn.onclick = function () {
+                            if (self.guestCount > 1) {
+                                self.guestCount--;
+                                self.updateGuestDisplay();
+                            }
+                        };
+                    }
 
-                                    self.updateTotals();
-                                };
-                            })(tipBtns[i]);
-                        }
+                    if (plusBtn) {
+                        plusBtn.onclick = function () {
+                            if (self.guestCount < 20) {
+                                self.guestCount++;
+                                self.updateGuestDisplay();
+                            }
+                        };
+                    }
+                },
 
-                        if (customTipInput) {
-                            customTipInput.oninput = function (e) {
-                                self.customTip = parseFloat(e.target.value) || 0;
-                                self.updateTotals();
+                updateGuestDisplay: function () {
+                    var display = document.getElementById('guestNumber');
+                    var input = document.getElementById('selectedGuests');
+
+                    if (display) display.textContent = this.guestCount;
+                    if (input) input.value = this.guestCount;
+                },
+
+                // Navigation
+                initNavigation: function () {
+                    var self = this;
+
+                    var nextBtns = document.querySelectorAll('.btn-next');
+                    var prevBtns = document.querySelectorAll('.btn-prev');
+
+                    for (var i = 0; i < nextBtns.length; i++) {
+                        (function (btn) {
+                            btn.onclick = function () {
+                                var nextStep = parseInt(btn.getAttribute('data-next'));
+                                if (self.validateStep(self.currentStep)) {
+                                    self.goToStep(nextStep);
+                                }
                             };
-                        }
-                    },
+                        })(nextBtns[i]);
+                    }
 
-                    validateForm: function () {
-                        var address = document.getElementById('deliveryAddress');
-                        var city = document.getElementById('city');
-                        var zip = document.getElementById('zipCode');
-                        var name = document.getElementById('checkoutName');
-                        var phone = document.getElementById('checkoutPhone');
-                        var email = document.getElementById('checkoutEmail');
+                    for (var j = 0; j < prevBtns.length; j++) {
+                        (function (btn) {
+                            btn.onclick = function () {
+                                var prevStep = parseInt(btn.getAttribute('data-prev'));
+                                self.goToStep(prevStep);
+                            };
+                        })(prevBtns[j]);
+                    }
+                },
+
+                validateStep: function (step) {
+                    if (step === 1) {
+                        if (!this.selectedDate) {
+                            showToast('Please select a date', 'error');
+                            return false;
+                        }
+                        if (!this.selectedTime) {
+                            showToast('Please select a time', 'error');
+                            return false;
+                        }
+                        return true;
+                    }
+
+                    if (step === 2) {
+                        var firstName = document.getElementById('firstName');
+                        var lastName = document.getElementById('lastName');
+                        var email = document.getElementById('email');
+                        var phone = document.getElementById('phone');
 
                         var valid = true;
-                        var fields = [address, city, zip, name, phone, email];
 
-                        for (var i = 0; i < fields.length; i++) {
-                            if (fields[i] && !fields[i].value.trim()) {
-                                fields[i].classList.add('error');
-                                valid = false;
-                            } else if (fields[i]) {
-                                fields[i].classList.remove('error');
-                            }
-                        }
-
-                        // Email validation
-                        if (email && email.value) {
-                            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                            if (!emailRegex.test(email.value)) {
-                                email.classList.add('error');
-                                valid = false;
-                            }
-                        }
-
-                        // Payment validation
-                        var paymentSelected = document.querySelector('input[name="payment"]:checked');
-                        if (!paymentSelected) {
-                            showToast('Please select a payment method', 'error');
+                        if (!firstName || !firstName.value.trim()) {
+                            firstName.classList.add('error');
                             valid = false;
+                        } else {
+                            firstName.classList.remove('error');
+                        }
+
+                        if (!lastName || !lastName.value.trim()) {
+                            lastName.classList.add('error');
+                            valid = false;
+                        } else {
+                            lastName.classList.remove('error');
+                        }
+
+                        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!email || !email.value.trim() || !emailRegex.test(email.value)) {
+                            email.classList.add('error');
+                            valid = false;
+                        } else {
+                            email.classList.remove('error');
+                        }
+
+                        if (!phone || !phone.value.trim() || phone.value.length < 10) {
+                            phone.classList.add('error');
+                            valid = false;
+                        } else {
+                            phone.classList.remove('error');
                         }
 
                         if (!valid) {
@@ -6035,159 +5682,511 @@
                         }
 
                         return valid;
-                    },
-
-                    initSubmit: function () {
-                        var self = this;
-
-                        // Create submit button if not exists
-                        var submitBtn = document.getElementById('placeOrderBtn');
-                        if (!submitBtn) {
-                            submitBtn = document.createElement('button');
-                            submitBtn.type = 'submit';
-                            submitBtn.id = 'placeOrderBtn';
-                            submitBtn.className = 'btn btn-primary btn-place-order';
-                            submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Place Order';
-                            this.form.appendChild(submitBtn);
-                        }
-
-                        this.form.onsubmit = function (e) {
-                            e.preventDefault();
-
-                            if (!self.validateForm()) return;
-
-                            self.submitOrder();
-                        };
-                    },
-
-                    submitOrder: function () {
-                        var self = this;
-
-                        var submitBtn = document.getElementById('placeOrderBtn');
-                        if (submitBtn) {
-                            submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-                        }
-
-                        var address = document.getElementById('deliveryAddress');
-                        var apartment = document.getElementById('apartment');
-                        var city = document.getElementById('city');
-                        var zip = document.getElementById('zipCode');
-                        var instructions = document.getElementById('deliveryInstructions');
-                        var name = document.getElementById('checkoutName');
-                        var phone = document.getElementById('checkoutPhone');
-                        var email = document.getElementById('checkoutEmail');
-                        var payment = document.querySelector('input[name="payment"]:checked');
-
-                        var paymentMethods = {
-                            'cash': 'Cash on Delivery',
-                            'card': 'Credit/Debit Card',
-                            'upi': 'UPI Payment'
-                        };
-
-                        var data = {
-                            type: 'order',
-                            data: {
-                                customerName: name ? name.value.trim() : '',
-                                customerEmail: email ? email.value.trim() : '',
-                                customerPhone: phone ? phone.value.trim() : '',
-                                streetAddress: address ? address.value.trim() : '',
-                                apartment: apartment ? apartment.value.trim() : '',
-                                city: city ? city.value.trim() : '',
-                                zipCode: zip ? zip.value.trim() : '',
-                                deliveryInstructions: instructions ? instructions.value.trim() : '',
-                                paymentMethod: payment ? paymentMethods[payment.value] || payment.value : 'Cash on Delivery',
-                                items: this.cartItems,
-                                subtotal: this.getSubtotal(),
-                                deliveryFee: this.getDeliveryFee(),
-                                tax: this.getTax(),
-                                tipAmount: this.getTip(),
-                                total: this.getTotal()
-                            }
-                        };
-
-                        fetch(GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(data)
-                        })
-                            .then(function () {
-                                localStorage.removeItem('cartItems');
-                                self.showSuccess(data.data);
-                            })
-                            .catch(function (error) {
-                                console.error('Error:', error);
-                                showToast('Failed to place order. Please try again.', 'error');
-                                if (submitBtn) {
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Place Order';
-                                }
-                            });
-                    },
-
-                    showSuccess: function (data) {
-                        var orderId = generateId('ORD');
-                        var container = this.form.closest('.checkout-container') || this.form.parentElement;
-
-                        var itemsHtml = '';
-                        for (var i = 0; i < data.items.length; i++) {
-                            var item = data.items[i];
-                            itemsHtml += '<div class="order-item">' +
-                                '<span>' + item.name + '</span>' +
-                                '<span>x' + (item.quantity || 1) + '</span>' +
-                                '<span>₹' + ((item.price || 0) * (item.quantity || 1)).toFixed(2) + '</span>' +
-                                '</div>';
-                        }
-
-                        container.innerHTML = '' +
-                            '<div class="order-confirmation">' +
-                            '<div class="success-icon-wrap">' +
-                            '<div class="success-icon"><i class="fas fa-check"></i></div>' +
-                            '</div>' +
-                            '<h1>Order Placed!</h1>' +
-                            '<p>Thank you, ' + data.customerName + '!</p>' +
-                            '<div class="order-id-card">' +
-                            '<small>Order ID</small>' +
-                            '<strong>' + orderId + '</strong>' +
-                            '</div>' +
-                            '<div class="delivery-time">' +
-                            '<i class="fas fa-clock"></i>' +
-                            '<span>Estimated: 30-45 minutes</span>' +
-                            '</div>' +
-                            '<div class="order-summary-card">' +
-                            '<h4>Order Summary</h4>' +
-                            '<div class="order-items">' + itemsHtml + '</div>' +
-                            '<div class="order-totals">' +
-                            '<div class="total-row"><span>Subtotal</span><span>₹' + data.subtotal.toFixed(2) + '</span></div>' +
-                            '<div class="total-row"><span>Delivery</span><span>' + (data.deliveryFee === 0 ? 'FREE' : '₹' + data.deliveryFee.toFixed(2)) + '</span></div>' +
-                            '<div class="total-row"><span>Tax</span><span>₹' + data.tax.toFixed(2) + '</span></div>' +
-                            (data.tipAmount > 0 ? '<div class="total-row"><span>Tip</span><span>₹' + data.tipAmount.toFixed(2) + '</span></div>' : '') +
-                            '<div class="total-row grand"><span>Total</span><span>₹' + data.total.toFixed(2) + '</span></div>' +
-                            '</div>' +
-                            '</div>' +
-                            '<div class="confirmation-email">' +
-                            '<i class="fas fa-envelope"></i>' +
-                            '<p>Confirmation sent to <strong>' + data.customerEmail + '</strong></p>' +
-                            '</div>' +
-                            '<a href="/" class="btn btn-primary"><i class="fas fa-home"></i> Back to Home</a>' +
-                            '</div>';
-
-                        showToast('Order placed successfully!', 'success');
                     }
-                };
 
-                // ============================================
-                // INITIALIZE ON PAGE LOAD
-                // ============================================
+                    return true;
+                },
 
-                document.addEventListener('DOMContentLoaded', function () {
-                    ReservationHandler.init();
-                    CheckoutHandler.init();
-                });
+                goToStep: function (step) {
+                    var steps = document.querySelectorAll('.form-step');
+                    for (var i = 0; i < steps.length; i++) {
+                        steps[i].classList.remove('active');
+                    }
 
-            })();
-        </script>
+                    var targetStep = document.getElementById('step' + step);
+                    if (targetStep) {
+                        targetStep.classList.add('active');
+                    }
+
+                    var progressSteps = document.querySelectorAll('.progress-step');
+                    for (var j = 0; j < progressSteps.length; j++) {
+                        var stepNum = parseInt(progressSteps[j].getAttribute('data-step'));
+                        progressSteps[j].classList.remove('active', 'completed');
+
+                        if (stepNum < step) {
+                            progressSteps[j].classList.add('completed');
+                        } else if (stepNum === step) {
+                            progressSteps[j].classList.add('active');
+                        }
+                    }
+
+                    this.currentStep = step;
+
+                    if (step === 3) {
+                        this.updateSummary();
+                    }
+
+                    this.form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                },
+
+                updateSummary: function () {
+                    var firstName = document.getElementById('firstName');
+                    var lastName = document.getElementById('lastName');
+                    var email = document.getElementById('email');
+                    var phone = document.getElementById('phone');
+                    var occasion = document.querySelector('input[name="occasion"]:checked');
+                    var requests = document.getElementById('specialRequests');
+
+                    var summaryDate = document.getElementById('summaryDate');
+                    var summaryTime = document.getElementById('summaryTime');
+                    var summaryGuests = document.getElementById('summaryGuests');
+                    var summaryName = document.getElementById('summaryName');
+                    var summaryEmail = document.getElementById('summaryEmail');
+                    var summaryPhone = document.getElementById('summaryPhone');
+                    var summaryOccasion = document.getElementById('summaryOccasion');
+                    var summaryOccasionWrap = document.getElementById('summaryOccasionWrap');
+                    var summaryRequests = document.getElementById('summaryRequests');
+                    var summaryRequestsWrap = document.getElementById('summaryRequestsWrap');
+
+                    if (summaryDate) summaryDate.textContent = this.getFormattedDate();
+                    if (summaryTime) summaryTime.textContent = this.getFormattedTime();
+                    if (summaryGuests) summaryGuests.textContent = this.guestCount + ' Guest(s)';
+                    if (summaryName) summaryName.textContent = (firstName ? firstName.value : '') + ' ' + (lastName ? lastName.value : '');
+                    if (summaryEmail) summaryEmail.textContent = email ? email.value : '';
+                    if (summaryPhone) summaryPhone.textContent = phone ? phone.value : '';
+
+                    if (summaryOccasionWrap && summaryOccasion) {
+                        if (occasion && occasion.value !== 'none') {
+                            summaryOccasionWrap.style.display = 'flex';
+                            summaryOccasion.textContent = occasion.value.charAt(0).toUpperCase() + occasion.value.slice(1);
+                        } else {
+                            summaryOccasionWrap.style.display = 'none';
+                        }
+                    }
+
+                    if (summaryRequestsWrap && summaryRequests) {
+                        if (requests && requests.value.trim()) {
+                            summaryRequestsWrap.style.display = 'flex';
+                            summaryRequests.textContent = requests.value;
+                        } else {
+                            summaryRequestsWrap.style.display = 'none';
+                        }
+                    }
+                },
+
+                // Submit
+                initSubmit: function () {
+                    var self = this;
+
+                    this.form.onsubmit = function (e) {
+                        e.preventDefault();
+
+                        var termsCheckbox = document.getElementById('termsAgree');
+                        if (termsCheckbox && !termsCheckbox.checked) {
+                            showToast('Please agree to the terms', 'error');
+                            return;
+                        }
+
+                        self.submitReservation();
+                    };
+                },
+
+                submitReservation: function () {
+                    var self = this;
+
+                    var submitBtn = this.form.querySelector('.btn-submit');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    }
+
+                    var firstName = document.getElementById('firstName');
+                    var lastName = document.getElementById('lastName');
+                    var email = document.getElementById('email');
+                    var phone = document.getElementById('phone');
+                    var occasion = document.querySelector('input[name="occasion"]:checked');
+                    var requests = document.getElementById('specialRequests');
+
+                    var data = {
+                        type: 'reservation',
+                        data: {
+                            date: document.getElementById('selectedDate') ? document.getElementById('selectedDate').value : '',
+                            dateFormatted: this.getFormattedDate(),
+                            time: this.selectedTime,
+                            timeFormatted: this.getFormattedTime(),
+                            guests: this.guestCount,
+                            firstName: firstName ? firstName.value.trim() : '',
+                            lastName: lastName ? lastName.value.trim() : '',
+                            email: email ? email.value.trim() : '',
+                            phone: phone ? phone.value.trim() : '',
+                            occasion: occasion ? occasion.value : 'none',
+                            specialRequests: requests ? requests.value.trim() : ''
+                        }
+                    };
+
+                    fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                        .then(function () {
+                            self.showSuccess(data.data);
+                        })
+                        .catch(function (error) {
+                            console.error('Error:', error);
+                            showToast('Failed to submit. Please try again.', 'error');
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Reservation';
+                            }
+                        });
+                },
+
+                showSuccess: function (data) {
+                    var reservationId = generateId('RES');
+
+                    this.form.innerHTML = '' +
+                        '<div class="confirmation-success">' +
+                        '<div class="success-icon-wrap">' +
+                        '<div class="success-icon"><i class="fas fa-check"></i></div>' +
+                        '</div>' +
+                        '<h2>Reservation Confirmed!</h2>' +
+                        '<p>Thank you, ' + data.firstName + '!</p>' +
+                        '<div class="confirmation-id">' +
+                        '<small style="color:black;">  Reservation ID</small>' +
+                        '<strong>' + reservationId + '</strong>' +
+                        '</div>' +
+                        '<div class="confirmation-details">' +
+                        '<div class="conf-item"><i class="fas fa-calendar"></i><span>' + data.dateFormatted + '</span></div>' +
+                        '<div class="conf-item"><i class="fas fa-clock"></i><span>' + data.timeFormatted + '</span></div>' +
+                        '<div class="conf-item"><i class="fas fa-users"></i><span>' + data.guests + ' Guest(s)</span></div>' +
+                        '</div>' +
+                        '<div class="confirmation-email">' +
+                        '<i class="fas fa-envelope"></i>' +
+                        '<p>Confirmation sent to <strong>' + data.email + '</strong></p>' +
+                        '</div>' +
+                        '<button class="btn btn-primary" onclick="location.reload()">' +
+                        '<i class="fas fa-plus"></i> New Reservation' +
+                        '</button>' +
+                        '</div>';
+
+                    showToast('Reservation submitted successfully!', 'success');
+                }
+            };
+
+            // ============================================
+            // CHECKOUT/ORDER FORM
+            // ============================================
+
+            var CheckoutHandler = {
+                form: null,
+                cartItems: [],
+                tipPercent: 15,
+                customTip: 0,
+
+                init: function () {
+                    this.form = document.getElementById('checkoutForm');
+                    if (!this.form) return;
+
+                    this.loadCart();
+                    this.initPayment();
+                    this.initTip();
+                    this.initSubmit();
+                    this.updateTotals();
+                },
+
+                loadCart: function () {
+                    var saved = localStorage.getItem('cartItems');
+                    if (saved) {
+                        try {
+                            this.cartItems = JSON.parse(saved);
+                        } catch (e) {
+                            this.cartItems = [];
+                        }
+                    }
+                },
+
+                getSubtotal: function () {
+                    var total = 0;
+                    for (var i = 0; i < this.cartItems.length; i++) {
+                        var item = this.cartItems[i];
+                        total += (item.price || 0) * (item.quantity || 1);
+                    }
+                    return total;
+                },
+
+                getDeliveryFee: function () {
+                    return this.getSubtotal() >= 500 ? 0 : 50;
+                },
+
+                getTax: function () {
+                    return this.getSubtotal() * 0.05;
+                },
+
+                getTip: function () {
+                    if (this.tipPercent === 'custom') {
+                        return this.customTip || 0;
+                    }
+                    return this.getSubtotal() * (this.tipPercent / 100);
+                },
+
+                getTotal: function () {
+                    return this.getSubtotal() + this.getDeliveryFee() + this.getTax() + this.getTip();
+                },
+
+                updateTotals: function () {
+                    var subtotalEl = document.getElementById('subtotalAmount');
+                    var deliveryEl = document.getElementById('deliveryAmount');
+                    var taxEl = document.getElementById('taxAmount');
+                    var tipEl = document.getElementById('tipAmount');
+                    var totalEl = document.getElementById('totalAmount');
+
+                    if (subtotalEl) subtotalEl.textContent = '₹' + this.getSubtotal().toFixed(2);
+                    if (deliveryEl) deliveryEl.textContent = this.getDeliveryFee() === 0 ? 'FREE' : '₹' + this.getDeliveryFee().toFixed(2);
+                    if (taxEl) taxEl.textContent = '₹' + this.getTax().toFixed(2);
+                    if (tipEl) tipEl.textContent = '₹' + this.getTip().toFixed(2);
+                    if (totalEl) totalEl.textContent = '₹' + this.getTotal().toFixed(2);
+                },
+
+                initPayment: function () {
+                    var options = document.querySelectorAll('input[name="payment"]');
+
+                    for (var i = 0; i < options.length; i++) {
+                        options[i].onchange = function (e) {
+                            var allOptions = document.querySelectorAll('.payment-option');
+                            for (var j = 0; j < allOptions.length; j++) {
+                                allOptions[j].classList.remove('active');
+                            }
+
+                            var parent = e.target.closest('.payment-option');
+                            if (parent) parent.classList.add('active');
+                        };
+                    }
+                },
+
+                initTip: function () {
+                    var self = this;
+                    var tipBtns = document.querySelectorAll('.tip-btn');
+                    var customTipDiv = document.getElementById('customTip');
+                    var customTipInput = document.getElementById('customTipAmount');
+
+                    for (var i = 0; i < tipBtns.length; i++) {
+                        (function (btn) {
+                            btn.onclick = function () {
+                                for (var j = 0; j < tipBtns.length; j++) {
+                                    tipBtns[j].classList.remove('active');
+                                }
+                                btn.classList.add('active');
+
+                                var tipVal = btn.getAttribute('data-tip');
+
+                                if (tipVal === 'custom') {
+                                    if (customTipDiv) customTipDiv.style.display = 'block';
+                                    self.tipPercent = 'custom';
+                                } else {
+                                    if (customTipDiv) customTipDiv.style.display = 'none';
+                                    self.tipPercent = parseInt(tipVal) || 0;
+                                    self.customTip = 0;
+                                }
+
+                                self.updateTotals();
+                            };
+                        })(tipBtns[i]);
+                    }
+
+                    if (customTipInput) {
+                        customTipInput.oninput = function (e) {
+                            self.customTip = parseFloat(e.target.value) || 0;
+                            self.updateTotals();
+                        };
+                    }
+                },
+
+                validateForm: function () {
+                    var address = document.getElementById('deliveryAddress');
+                    var city = document.getElementById('city');
+                    var zip = document.getElementById('zipCode');
+                    var name = document.getElementById('checkoutName');
+                    var phone = document.getElementById('checkoutPhone');
+                    var email = document.getElementById('checkoutEmail');
+
+                    var valid = true;
+                    var fields = [address, city, zip, name, phone, email];
+
+                    for (var i = 0; i < fields.length; i++) {
+                        if (fields[i] && !fields[i].value.trim()) {
+                            fields[i].classList.add('error');
+                            valid = false;
+                        } else if (fields[i]) {
+                            fields[i].classList.remove('error');
+                        }
+                    }
+
+                    // Email validation
+                    if (email && email.value) {
+                        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(email.value)) {
+                            email.classList.add('error');
+                            valid = false;
+                        }
+                    }
+
+                    // Payment validation
+                    var paymentSelected = document.querySelector('input[name="payment"]:checked');
+                    if (!paymentSelected) {
+                        showToast('Please select a payment method', 'error');
+                        valid = false;
+                    }
+
+                    if (!valid) {
+                        showToast('Please fill all required fields', 'error');
+                    }
+
+                    return valid;
+                },
+
+                initSubmit: function () {
+                    var self = this;
+
+                    // Create submit button if not exists
+                    var submitBtn = document.getElementById('placeOrderBtn');
+                    if (!submitBtn) {
+                        submitBtn = document.createElement('button');
+                        submitBtn.type = 'submit';
+                        submitBtn.id = 'placeOrderBtn';
+                        submitBtn.className = 'btn btn-primary btn-place-order';
+                        submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Place Order';
+                        this.form.appendChild(submitBtn);
+                    }
+
+                    this.form.onsubmit = function (e) {
+                        e.preventDefault();
+
+                        if (!self.validateForm()) return;
+
+                        self.submitOrder();
+                    };
+                },
+
+                submitOrder: function () {
+                    var self = this;
+
+                    var submitBtn = document.getElementById('placeOrderBtn');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    }
+
+                    var address = document.getElementById('deliveryAddress');
+                    var apartment = document.getElementById('apartment');
+                    var city = document.getElementById('city');
+                    var zip = document.getElementById('zipCode');
+                    var instructions = document.getElementById('deliveryInstructions');
+                    var name = document.getElementById('checkoutName');
+                    var phone = document.getElementById('checkoutPhone');
+                    var email = document.getElementById('checkoutEmail');
+                    var payment = document.querySelector('input[name="payment"]:checked');
+
+                    var paymentMethods = {
+                        'cash': 'Cash on Delivery',
+                        'card': 'Credit/Debit Card',
+                        'upi': 'UPI Payment'
+                    };
+
+                    var data = {
+                        type: 'order',
+                        data: {
+                            customerName: name ? name.value.trim() : '',
+                            customerEmail: email ? email.value.trim() : '',
+                            customerPhone: phone ? phone.value.trim() : '',
+                            streetAddress: address ? address.value.trim() : '',
+                            apartment: apartment ? apartment.value.trim() : '',
+                            city: city ? city.value.trim() : '',
+                            zipCode: zip ? zip.value.trim() : '',
+                            deliveryInstructions: instructions ? instructions.value.trim() : '',
+                            paymentMethod: payment ? paymentMethods[payment.value] || payment.value : 'Cash on Delivery',
+                            items: this.cartItems,
+                            subtotal: this.getSubtotal(),
+                            deliveryFee: this.getDeliveryFee(),
+                            tax: this.getTax(),
+                            tipAmount: this.getTip(),
+                            total: this.getTotal()
+                        }
+                    };
+
+                    fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                        .then(function () {
+                            localStorage.removeItem('cartItems');
+                            self.showSuccess(data.data);
+                        })
+                        .catch(function (error) {
+                            console.error('Error:', error);
+                            showToast('Failed to place order. Please try again.', 'error');
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Place Order';
+                            }
+                        });
+                },
+
+                showSuccess: function (data) {
+                    var orderId = generateId('ORD');
+                    var container = this.form.closest('.checkout-container') || this.form.parentElement;
+
+                    var itemsHtml = '';
+                    for (var i = 0; i < data.items.length; i++) {
+                        var item = data.items[i];
+                        itemsHtml += '<div class="order-item">' +
+                            '<span>' + item.name + '</span>' +
+                            '<span>x' + (item.quantity || 1) + '</span>' +
+                            '<span>₹' + ((item.price || 0) * (item.quantity || 1)).toFixed(2) + '</span>' +
+                            '</div>';
+                    }
+
+                    container.innerHTML = '' +
+                        '<div class="order-confirmation">' +
+                        '<div class="success-icon-wrap">' +
+                        '<div class="success-icon"><i class="fas fa-check"></i></div>' +
+                        '</div>' +
+                        '<h1>Order Placed!</h1>' +
+                        '<p>Thank you, ' + data.customerName + '!</p>' +
+                        '<div class="order-id-card">' +
+                        '<small>Order ID</small>' +
+                        '<strong>' + orderId + '</strong>' +
+                        '</div>' +
+                        '<div class="delivery-time">' +
+                        '<i class="fas fa-clock"></i>' +
+                        '<span>Estimated: 30-45 minutes</span>' +
+                        '</div>' +
+                        '<div class="order-summary-card">' +
+                        '<h4>Order Summary</h4>' +
+                        '<div class="order-items">' + itemsHtml + '</div>' +
+                        '<div class="order-totals">' +
+                        '<div class="total-row"><span>Subtotal</span><span>₹' + data.subtotal.toFixed(2) + '</span></div>' +
+                        '<div class="total-row"><span>Delivery</span><span>' + (data.deliveryFee === 0 ? 'FREE' : '₹' + data.deliveryFee.toFixed(2)) + '</span></div>' +
+                        '<div class="total-row"><span>Tax</span><span>₹' + data.tax.toFixed(2) + '</span></div>' +
+                        (data.tipAmount > 0 ? '<div class="total-row"><span>Tip</span><span>₹' + data.tipAmount.toFixed(2) + '</span></div>' : '') +
+                        '<div class="total-row grand"><span>Total</span><span>₹' + data.total.toFixed(2) + '</span></div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="confirmation-email">' +
+                        '<i class="fas fa-envelope"></i>' +
+                        '<p>Confirmation sent to <strong>' + data.customerEmail + '</strong></p>' +
+                        '</div>' +
+                        '<a href="index.html" class="btn btn-primary"><i class="fas fa-home"></i> Back to Home</a>' +
+                        '</div>';
+
+                    showToast('Order placed successfully!', 'success');
+                }
+            };
+
+            // ============================================
+            // INITIALIZE ON PAGE LOAD
+            // ============================================
+
+            document.addEventListener('DOMContentLoaded', function () {
+                ReservationHandler.init();
+                CheckoutHandler.init();
+            });
+
+        })();
+    </script>
 
 </body>
 
