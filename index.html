@@ -22,6 +22,45 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            color: var(--text-white);
+            font-family: var(--font-secondary);
+            font-size: 1rem;
+            transition: border-color var(--transition-fast), background var(--transition-fast);
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-color);
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+
+        .checkout-content {
+            display: grid;
+            gap: 50px;
+            padding-bottom: 50px;
+        }
+
+        @media (max-width: 1200px) {
+            .checkout-content {
+                grid-template-columns: 1fr 350px;
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .checkout-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -187,16 +226,16 @@
                     <a href="#menu" class="nav-link">
                         <i class="fas fa-book-open"></i>
                         <span>Menu</span>
-                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                        <!-- <i class="fas fa-chevron-down dropdown-icon"></i> -->
                     </a>
                     <!-- Dropdown Menu -->
-                    <ul class="dropdown-menu">
+                    <!-- <ul class="dropdown-menu">
                         <li><a href="#menu-starters"><i class="fas fa-leaf"></i> Starters</a></li>
                         <li><a href="#menu-mains"><i class="fas fa-drumstick-bite"></i> Main Course</a></li>
                         <li><a href="#menu-desserts"><i class="fas fa-ice-cream"></i> Desserts</a></li>
                         <li><a href="#menu-drinks"><i class="fas fa-wine-glass-alt"></i> Drinks</a></li>
                         <li><a href="#menu-specials"><i class="fas fa-star"></i> Chef's Special</a></li>
-                    </ul>
+                    </ul> -->
                 </li>
                 <li class="nav-item">
                     <a href="#reservation" class="nav-link">
@@ -455,7 +494,7 @@
     <!-- ============================================
      TIMELINE SECTION
      ============================================ -->
-    <section class="timeline-section" id="story">
+    <!-- <section class="timeline-section" id="story">
         <div class="section-header" data-aos="fade-up">
             <span class="section-subtitle">
                 <i class="fas fa-history"></i>
@@ -468,7 +507,7 @@
         <div class="timeline-container">
             <div class="timeline-line"></div>
 
-            <!-- Timeline Item 1 -->
+            
             <div class="timeline-item" data-aos="fade-right">
                 <div class="timeline-dot">
                     <i class="fas fa-flag"></i>
@@ -485,7 +524,7 @@
                 </div>
             </div>
 
-            <!-- Timeline Item 2 -->
+            
             <div class="timeline-item" data-aos="fade-left">
                 <div class="timeline-dot">
                     <i class="fas fa-star"></i>
@@ -502,7 +541,7 @@
                 </div>
             </div>
 
-            <!-- Timeline Item 3 -->
+            
             <div class="timeline-item" data-aos="fade-right">
                 <div class="timeline-dot">
                     <i class="fas fa-expand-arrows-alt"></i>
@@ -519,7 +558,7 @@
                 </div>
             </div>
 
-            <!-- Timeline Item 4 -->
+            
             <div class="timeline-item" data-aos="fade-left">
                 <div class="timeline-dot">
                     <i class="fas fa-gem"></i>
@@ -536,7 +575,7 @@
                 </div>
             </div>
 
-            <!-- Timeline Item 5 -->
+            
             <div class="timeline-item" data-aos="fade-right">
                 <div class="timeline-dot current">
                     <i class="fas fa-crown"></i>
@@ -553,7 +592,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- ============================================
      CHEFS SECTION
@@ -893,7 +932,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-bestseller"><i class="fas fa-fire-alt"></i></span>
                         </div>
-                        <div class="menu-price">$220</div>
+                        <div class="menu-price">₹220</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -938,7 +977,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-hot"><i class="fas fa-pepper-hot"></i></span>
                         </div>
-                        <div class="menu-price">$230</div>
+                        <div class="menu-price">₹230</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -982,7 +1021,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-vegan"><i class="fas fa-leaf"></i></span>
                         </div>
-                        <div class="menu-price">$230</div>
+                        <div class="menu-price">₹230</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1024,7 +1063,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$240</div>
+                        <div class="menu-price">₹240</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1066,7 +1105,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$220</div>
+                        <div class="menu-price">₹220</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1108,7 +1147,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$220</div>
+                        <div class="menu-price">₹220</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1153,7 +1192,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-bestseller"><i class="fas fa-fire-alt"></i></span>
                         </div>
-                        <div class="menu-price">$199</div>
+                        <div class="menu-price">₹199</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1194,7 +1233,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$220</div>
+                        <div class="menu-price">₹220</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1239,7 +1278,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-vegan"><i class="fas fa-leaf"></i></span>
                         </div>
-                        <div class="menu-price">$140</div>
+                        <div class="menu-price">₹140</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1280,7 +1319,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$150</div>
+                        <div class="menu-price">₹150</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1322,7 +1361,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$100</div>
+                        <div class="menu-price">₹100</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1363,7 +1402,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$120</div>
+                        <div class="menu-price">₹120</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1405,7 +1444,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$160</div>
+                        <div class="menu-price">₹160</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1446,7 +1485,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$200</div>
+                        <div class="menu-price">₹200</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1491,7 +1530,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-vegan"><i class="fas fa-leaf"></i></span>
                         </div>
-                        <div class="menu-price">$199</div>
+                        <div class="menu-price">₹199</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1534,7 +1573,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$130</div>
+                        <div class="menu-price">₹130</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1578,7 +1617,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-hot"><i class="fas fa-pepper-hot"></i></span>
                         </div>
-                        <div class="menu-price">$150</div>
+                        <div class="menu-price">₹150</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1623,7 +1662,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-bestseller"><i class="fas fa-fire-alt"></i></span>
                         </div>
-                        <div class="menu-price">$140</div>
+                        <div class="menu-price">₹140</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1665,7 +1704,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$150</div>
+                        <div class="menu-price">₹150</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1711,7 +1750,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$170</div>
+                        <div class="menu-price">₹170</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1755,7 +1794,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$220</div>
+                        <div class="menu-price">₹220</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1800,7 +1839,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-hot"><i class="fas fa-pepper-hot"></i></span>
                         </div>
-                        <div class="menu-price">$230</div>
+                        <div class="menu-price">₹230</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1842,7 +1881,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$220</div>
+                        <div class="menu-price">₹220</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1887,7 +1926,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-bestseller"><i class="fas fa-fire-alt"></i></span>
                         </div>
-                        <div class="menu-price">$199</div>
+                        <div class="menu-price">₹199</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1929,7 +1968,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$220</div>
+                        <div class="menu-price">₹220</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -1971,7 +2010,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$220</div>
+                        <div class="menu-price">₹220</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2013,7 +2052,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$240</div>
+                        <div class="menu-price">₹240</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2057,7 +2096,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$100</div>
+                        <div class="menu-price">₹100</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2101,7 +2140,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-hot"><i class="fas fa-pepper-hot"></i></span>
                         </div>
-                        <div class="menu-price">$120</div>
+                        <div class="menu-price">₹120</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2146,7 +2185,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-bestseller"><i class="fas fa-fire-alt"></i></span>
                         </div>
-                        <div class="menu-price">$130</div>
+                        <div class="menu-price">₹130</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2187,7 +2226,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$140</div>
+                        <div class="menu-price">₹140</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2231,7 +2270,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-hot"><i class="fas fa-pepper-hot"></i></span>
                         </div>
-                        <div class="menu-price">$150</div>
+                        <div class="menu-price">₹150</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2276,7 +2315,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$160</div>
+                        <div class="menu-price">₹160</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2320,7 +2359,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$60</div>
+                        <div class="menu-price">₹60</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2364,7 +2403,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-bestseller"><i class="fas fa-fire-alt"></i></span>
                         </div>
-                        <div class="menu-price">$80</div>
+                        <div class="menu-price">₹80</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2405,7 +2444,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$50</div>
+                        <div class="menu-price">₹50</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2451,7 +2490,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-bestseller"><i class="fas fa-fire-alt"></i></span>
                         </div>
-                        <div class="menu-price">$80</div>
+                        <div class="menu-price">₹80</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2493,7 +2532,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$90</div>
+                        <div class="menu-price">₹90</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2537,7 +2576,7 @@
                         <div class="menu-badges">
                             <span class="badge badge-hot"><i class="fas fa-pepper-hot"></i></span>
                         </div>
-                        <div class="menu-price">$110</div>
+                        <div class="menu-price">₹110</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2579,7 +2618,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$100</div>
+                        <div class="menu-price">₹100</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2621,7 +2660,7 @@
                                 Quick View
                             </button>
                         </div>
-                        <div class="menu-price">$110</div>
+                        <div class="menu-price">₹110</div>
                     </div>
                     <div class="menu-card-content">
                         <div class="menu-card-header">
@@ -2727,7 +2766,7 @@
                     <div class="modal-footer">
                         <div class="modal-price">
                             <span class="price-label">Price</span>
-                            <span class="price-value" id="modalPrice">$24.99</span>
+                            <span class="price-value" id="modalPrice">₹24.99</span>
                         </div>
                         <div class="modal-quantity">
                             <button class="qty-btn minus" id="qtyMinus">
@@ -3293,7 +3332,7 @@
                     <div class="feature-icon-sm">
                         <i class="fas fa-truck"></i>
                     </div>
-                    <span>Free delivery over $30</span>
+                    <span>Free delivery over ₹300</span>
                 </div>
                 <div class="order-feature">
                     <div class="feature-icon-sm">
@@ -3330,7 +3369,7 @@
                         </div>
                         <div class="quick-item-info">
                             <h4>Wagyu Ribeye</h4>
-                            <p class="quick-item-price">$38.99</p>
+                            <p class="quick-item-price">₹38.99</p>
                         </div>
                         <button class="quick-add-btn" data-id="4" data-name="Wagyu Ribeye Steak" data-price="38.99"
                             data-image="https://images.unsplash.com/photo-1546833998-877b37c2e5c6?w=200">
@@ -3345,7 +3384,7 @@
                         </div>
                         <div class="quick-item-info">
                             <h4>Chocolate Lava Cake</h4>
-                            <p class="quick-item-price">$14.99</p>
+                            <p class="quick-item-price">₹14.99</p>
                         </div>
                         <button class="quick-add-btn" data-id="11" data-name="Chocolate Lava Cake" data-price="14.99"
                             data-image="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200">
@@ -3360,7 +3399,7 @@
                         </div>
                         <div class="quick-item-info">
                             <h4>Butter Lobster</h4>
-                            <p class="quick-item-price">$58.99</p>
+                            <p class="quick-item-price">₹58.99</p>
                         </div>
                         <button class="quick-add-btn" data-id="9" data-name="Butter Poached Lobster" data-price="58.99"
                             data-image="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=200">
@@ -3375,7 +3414,7 @@
                         </div>
                         <div class="quick-item-info">
                             <h4>Sushi Platter</h4>
-                            <p class="quick-item-price">$42.99</p>
+                            <p class="quick-item-price">₹42.99</p>
                         </div>
                         <button class="quick-add-btn" data-id="10" data-name="Premium Sushi Platter" data-price="42.99"
                             data-image="https://images.unsplash.com/photo-1579631542720-3a87824fff86?w=200">
@@ -3390,7 +3429,7 @@
                         </div>
                         <div class="quick-item-info">
                             <h4>Truffle Pasta</h4>
-                            <p class="quick-item-price">$24.99</p>
+                            <p class="quick-item-price">₹24.99</p>
                         </div>
                         <button class="quick-add-btn" data-id="6" data-name="Truffle Mushroom Pasta" data-price="24.99"
                             data-image="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=200">
@@ -3406,7 +3445,7 @@
                         </div>
                         <div class="quick-item-info">
                             <h4>Royale Martini</h4>
-                            <p class="quick-item-price">$15.99</p>
+                            <p class="quick-item-price">₹15.99</p>
                         </div>
                         <button class="quick-add-btn" data-id="15" data-name="Signature Royale Martini"
                             data-price="15.99"
@@ -3492,23 +3531,20 @@
         <div class="cart-summary" id="cartSummary">
             <div class="summary-row">
                 <span>Subtotal</span>
-                <span id="cartSubtotal">$0.00</span>
+                <span id="cartSubtotal">₹0.00</span>
             </div>
             <div class="summary-row" id="discountRow" style="display: none;">
                 <span>Discount</span>
-                <span class="discount-amount" id="cartDiscount">-$0.00</span>
+                <span class="discount-amount" id="cartDiscount">-₹0.00</span>
             </div>
             <div class="summary-row" id="deliveryRow">
                 <span>Delivery Fee</span>
-                <span id="deliveryFee">$4.99</span>
+                <span id="deliveryFee">₹4.99</span>
             </div>
-            <div class="summary-row">
-                <span>Tax (8%)</span>
-                <span id="cartTax">$0.00</span>
-            </div>
+
             <div class="summary-row total">
                 <span>Total</span>
-                <span id="cartTotal">$0.00</span>
+                <span id="cartTotal">₹0.00</span>
             </div>
         </div>
 
@@ -3692,7 +3728,7 @@
                                 <div class="form-group">
                                     <label class="form-label" for="customTipAmount">Enter Tip Amount</label>
                                     <div class="custom-tip-input">
-                                        <span>$</span>
+                                        <span>₹</span>
                                         <input type="number" id="customTipAmount" class="form-input" placeholder="0.00"
                                             min="0" step="0.01">
                                     </div>
@@ -3714,27 +3750,27 @@
                         <div class="checkout-totals">
                             <div class="total-row">
                                 <span>Subtotal</span>
-                                <span id="checkoutSubtotal">$0.00</span>
+                                <span id="checkoutSubtotal">₹0.00</span>
                             </div>
                             <div class="total-row" id="checkoutDiscountRow" style="display: none;">
                                 <span>Discount</span>
-                                <span class="discount" id="checkoutDiscount">-$0.00</span>
+                                <span class="discount" id="checkoutDiscount">-₹0.00</span>
                             </div>
                             <div class="total-row" id="checkoutDeliveryRow">
                                 <span>Delivery</span>
-                                <span id="checkoutDelivery">$4.99</span>
+                                <span id="checkoutDelivery">₹4.99</span>
                             </div>
                             <div class="total-row">
                                 <span>Tax (8%)</span>
-                                <span id="checkoutTaxAmount">$0.00</span>
+                                <span id="checkoutTaxAmount">₹0.00</span>
                             </div>
                             <div class="total-row">
                                 <span>Tip</span>
-                                <span id="checkoutTip">$0.00</span>
+                                <span id="checkoutTip">₹0.00</span>
                             </div>
                             <div class="total-row grand-total">
                                 <span>Total</span>
-                                <span id="checkoutGrandTotal">$0.00</span>
+                                <span id="checkoutGrandTotal">₹0.00</span>
                             </div>
                         </div>
 
@@ -3750,7 +3786,7 @@
                             id="placeOrderBtn">
                             <i class="fas fa-check-circle"></i>
                             <span>Place Order</span>
-                            <span class="order-total" id="orderTotalBtn">$0.00</span>
+                            <span class="order-total" id="orderTotalBtn">₹0.00</span>
                         </button>
 
                         <!-- Secure Note -->
@@ -3802,7 +3838,7 @@
                 </div>
                 <div class="confirm-detail-item">
                     <span class="detail-label">Total Amount</span>
-                    <span class="detail-value" id="confirmTotal">$0.00</span>
+                    <span class="detail-value" id="confirmTotal">₹0.00</span>
                 </div>
             </div>
 

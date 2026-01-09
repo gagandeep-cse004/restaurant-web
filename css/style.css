@@ -3824,6 +3824,10 @@ section {
     font-size: 1rem;
     transition: all var(--transition-fast);
 }
+.form-input{
+    
+    color: rgb(200, 38, 38);
+}
 
 .form-input::placeholder,
 .form-textarea::placeholder {
@@ -4202,8 +4206,8 @@ section {
 }
 
 .checkmark {
-    width: 24px;
-    height: 24px;
+    width: 4px;
+    height: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4301,8 +4305,8 @@ section {
 }
 
 .checkmark {
-    width: 100px;
-    height: 100px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: block;
     stroke-width: 2;

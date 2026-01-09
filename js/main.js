@@ -343,32 +343,6 @@ function initActiveNavHighlight() {
 }
 
 /* ============================================
-   CART FUNCTIONALITY (Basic)
-   ============================================ */
-let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-
-function updateCartCount() {
-    const cartCount = document.getElementById('cartCount');
-    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-    cartCount.textContent = totalItems;
-
-    if (totalItems === 0) {
-        cartCount.classList.add('empty');
-    } else {
-        cartCount.classList.remove('empty');
-        // Add animation
-        cartCount.style.animation = 'none';
-        setTimeout(() => {
-            cartCount.style.animation = 'cartPulse 0.5s ease';
-        }, 10);
-    }
-}
-
-// Initialize cart count on load
-document.addEventListener('DOMContentLoaded', updateCartCount);
-
-/* ============================================
    SMOOTH SCROLL FOR NAV LINKS
    ============================================ */
 document.querySelectorAll('.nav-link[href^="#"]').forEach(anchor => {
@@ -1087,7 +1061,7 @@ function initQuickViewModal() {
         document.getElementById('modalTime').textContent = item.time;
         document.getElementById('modalCalories').textContent = item.calories;
         document.getElementById('modalServing').textContent = item.serving;
-        document.getElementById('modalPrice').textContent = `$${item.price.toFixed(2)}`;
+        document.getElementById('modalPrice').textContent = `${item.price.toFixed(2)}`;
         document.getElementById('qtyInput').value = 1;
         document.getElementById('addToCartModal').dataset.id = id;
 
@@ -1114,10 +1088,8 @@ function initQuickViewModal() {
 }
 
 /* ============================================
-   ADD TO CART FUNCTIONALITY
+   ADD TO CART FUNCTIONALITY (Integrated with Order Cart)
    ============================================ */
-let cart = JSON.parse(localStorage.getItem('restaurantCart')) || [];
-
 function initAddToCart() {
     const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
 
@@ -1125,11 +1097,22 @@ function initAddToCart() {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
 
-            const itemId = this.dataset.id;
-            const itemName = this.dataset.name;
-            const itemPrice = parseFloat(this.dataset.price);
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            const price = parseFloat(this.dataset.price) || 0;
 
-            addItemToCart(itemId, itemName, itemPrice, 1);
+            // Try to get image from the menu card, fall back to default
+            let image = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200';
+            const menuCard = this.closest('.menu-card');
+            if (menuCard) {
+                const cardImage = menuCard.querySelector('.menu-card-image img');
+                if (cardImage) {
+                    image = cardImage.src;
+                }
+            }
+
+            // Use the main ordering cart so items appear in the sidebar / checkout
+            addToOrderCart(id, name, price, image, 1);
 
             // Button animation
             this.classList.add('added');
@@ -1138,63 +1121,6 @@ function initAddToCart() {
             }, 2000);
         });
     });
-
-    // Update cart count on page load
-    updateCartDisplay();
-}
-
-function addItemToCart(id, name, price, quantity = 1) {
-    const existingItem = cart.find(item => item.id === id);
-
-    if (existingItem) {
-        existingItem.quantity += quantity;
-    } else {
-        cart.push({
-            id: id,
-            name: name,
-            price: price,
-            quantity: quantity
-        });
-    }
-
-    // Save to localStorage
-    localStorage.setItem('restaurantCart', JSON.stringify(cart));
-
-    // Update display
-    updateCartDisplay();
-
-    // Show toast notification
-    showToast('Added to Cart', `${name} x${quantity} has been added to your cart.`);
-}
-
-function updateCartDisplay() {
-    const cartCount = document.getElementById('cartCount');
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-    if (cartCount) {
-        cartCount.textContent = totalItems;
-
-        if (totalItems === 0) {
-            cartCount.style.display = 'none';
-        } else {
-            cartCount.style.display = 'flex';
-            // Animate
-            cartCount.style.animation = 'none';
-            setTimeout(() => {
-                cartCount.style.animation = 'cartPulse 0.5s ease';
-            }, 10);
-        }
-    }
-}
-
-function getCartTotal() {
-    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-}
-
-function clearCart() {
-    cart = [];
-    localStorage.setItem('restaurantCart', JSON.stringify(cart));
-    updateCartDisplay();
 }
 
 /* ============================================
@@ -1783,6 +1709,9 @@ document.addEventListener('DOMContentLoaded', function () {
     initCheckout();
 });
 
+// Google Sheets Web App URL (replace with your deployed Apps Script URL)
+const GOOGLE_SHEET_WEB_APP_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
 // Global cart state
 let orderCart = JSON.parse(localStorage.getItem('restaurantOrderCart')) || [];
 let orderType = 'delivery';
@@ -1830,6 +1759,11 @@ function updateOrderTypeDisplay() {
     const orderTypeText = document.getElementById('orderTypeText');
     const estimatedTime = document.getElementById('estimatedTime');
 
+    // Delivery address fields
+    const deliveryAddress = document.getElementById('deliveryAddress');
+    const cityInput = document.getElementById('city');
+    const zipInput = document.getElementById('zipCode');
+
     if (orderType === 'delivery') {
         if (display) {
             display.innerHTML = '<i class="fas fa-motorcycle"></i><span>Delivery</span>';
@@ -1840,6 +1774,11 @@ function updateOrderTypeDisplay() {
         if (deliveryAddressSection) deliveryAddressSection.style.display = 'block';
         if (orderTypeText) orderTypeText.textContent = 'Delivery';
         if (estimatedTime) estimatedTime.textContent = '30-45 min';
+
+        // Make delivery fields required for delivery
+        if (deliveryAddress) deliveryAddress.required = true;
+        if (cityInput) cityInput.required = true;
+        if (zipInput) zipInput.required = true;
     } else {
         if (display) {
             display.innerHTML = '<i class="fas fa-store"></i><span>Pickup</span>';
@@ -1850,6 +1789,11 @@ function updateOrderTypeDisplay() {
         if (deliveryAddressSection) deliveryAddressSection.style.display = 'none';
         if (orderTypeText) orderTypeText.textContent = 'Pickup';
         if (estimatedTime) estimatedTime.textContent = '15-20 min';
+
+        // Remove required from hidden delivery fields so browser validation doesn't fail
+        if (deliveryAddress) deliveryAddress.required = false;
+        if (cityInput) cityInput.required = false;
+        if (zipInput) zipInput.required = false;
     }
 }
 
@@ -2077,7 +2021,7 @@ function updateCartDisplay() {
                 </div>
                 <div class="cart-item-details">
                     <h4 class="cart-item-name">${item.name}</h4>
-                    <p class="cart-item-price">$${item.price.toFixed(2)}</p>
+                    <p class="cart-item-price">${item.price.toFixed(2)}</p>
                     <div class="cart-item-controls">
                         <div class="quantity-control">
                             <button class="quantity-btn" onclick="updateItemQuantity('${item.id}', -1)">
@@ -2143,11 +2087,11 @@ function updateCartTotals() {
     const cartTax = document.getElementById('cartTax');
     const cartTotal = document.getElementById('cartTotal');
 
-    if (cartSubtotal) cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+    if (cartSubtotal) cartSubtotal.textContent = `${subtotal.toFixed(2)}`;
 
     if (discount > 0) {
         if (discountRow) discountRow.style.display = 'flex';
-        if (cartDiscount) cartDiscount.textContent = `-$${discount.toFixed(2)}`;
+        if (cartDiscount) cartDiscount.textContent = `-${discount.toFixed(2)}`;
     } else {
         if (discountRow) discountRow.style.display = 'none';
     }
@@ -2157,13 +2101,13 @@ function updateCartTotals() {
             deliveryFee.textContent = 'FREE';
             deliveryFee.style.color = 'var(--accent-green)';
         } else {
-            deliveryFee.textContent = `$${delivery.toFixed(2)}`;
+            deliveryFee.textContent = `${delivery.toFixed(2)}`;
             deliveryFee.style.color = '';
         }
     }
 
-    if (cartTax) cartTax.textContent = `$${tax.toFixed(2)}`;
-    if (cartTotal) cartTotal.textContent = `$${total.toFixed(2)}`;
+    if (cartTax) cartTax.textContent = `${tax.toFixed(2)}`;
+    if (cartTotal) cartTotal.textContent = `${total.toFixed(2)}`;
 
     // Update checkout summary
     updateCheckoutSummary(subtotal, discount, delivery, tax, total);
@@ -2376,7 +2320,7 @@ function updateCheckoutItems() {
                     <p class="checkout-item-name">${item.name}</p>
                     <p class="checkout-item-qty">Qty: ${item.quantity}</p>
                 </div>
-                <span class="checkout-item-price">$${(item.price * item.quantity).toFixed(2)}</span>
+                <span class="checkout-item-price">${(item.price * item.quantity).toFixed(2)}</span>
             </div>
         `).join('');
     }
@@ -2391,11 +2335,11 @@ function updateCheckoutSummary(subtotal, discount, delivery, tax, total) {
     const checkoutGrandTotal = document.getElementById('checkoutGrandTotal');
     const orderTotalBtn = document.getElementById('orderTotalBtn');
 
-    if (checkoutSubtotal) checkoutSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+    if (checkoutSubtotal) checkoutSubtotal.textContent = `${subtotal.toFixed(2)}`;
 
     if (discount > 0) {
         if (checkoutDiscountRow) checkoutDiscountRow.style.display = 'flex';
-        if (checkoutDiscount) checkoutDiscount.textContent = `-$${discount.toFixed(2)}`;
+        if (checkoutDiscount) checkoutDiscount.textContent = `-${discount.toFixed(2)}`;
     } else {
         if (checkoutDiscountRow) checkoutDiscountRow.style.display = 'none';
     }
@@ -2408,7 +2352,7 @@ function updateCheckoutSummary(subtotal, discount, delivery, tax, total) {
         }
     }
 
-    if (checkoutTaxAmount) checkoutTaxAmount.textContent = `$${tax.toFixed(2)}`;
+    if (checkoutTaxAmount) checkoutTaxAmount.textContent = `${tax.toFixed(2)}`;
 
     // Calculate with tip
     updateCheckoutTotals();
@@ -2460,9 +2404,9 @@ function updateCheckoutTotals() {
     const checkoutGrandTotal = document.getElementById('checkoutGrandTotal');
     const orderTotalBtn = document.getElementById('orderTotalBtn');
 
-    if (checkoutTip) checkoutTip.textContent = `$${tip.toFixed(2)}`;
-    if (checkoutGrandTotal) checkoutGrandTotal.textContent = `$${grandTotal.toFixed(2)}`;
-    if (orderTotalBtn) orderTotalBtn.textContent = `$${grandTotal.toFixed(2)}`;
+    if (checkoutTip) checkoutTip.textContent = `${tip.toFixed(2)}`;
+    if (checkoutGrandTotal) checkoutGrandTotal.textContent = `${grandTotal.toFixed(2)}`;
+    if (orderTotalBtn) orderTotalBtn.textContent = `${grandTotal.toFixed(2)}`;
 }
 
 function validateCheckoutForm() {
@@ -2550,6 +2494,9 @@ function processOrder() {
     // Save order to localStorage
     saveOrder(orderData);
 
+    // Send order to Google Sheet (non-blocking)
+    sendOrderToGoogleSheet(orderData);
+
     // Show confirmation
     showOrderConfirmation(orderData);
 
@@ -2558,6 +2505,54 @@ function processOrder() {
 
     // Close checkout
     closeCheckout();
+}
+
+// Send order details to Google Sheets via Apps Script Web App
+function sendOrderToGoogleSheet(orderData) {
+    // If URL not configured, skip silently
+    if (!GOOGLE_SHEET_WEB_APP_URL ||
+        GOOGLE_SHEET_WEB_APP_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+        console.warn('Google Sheets Web App URL is not configured.');
+        return;
+    }
+
+    // Flatten data for the sheet
+    const payload = {
+        orderNumber: orderData.orderNumber,
+        orderType: orderData.orderType,
+        customerName: orderData.customer.name,
+        customerPhone: orderData.customer.phone,
+        customerEmail: orderData.customer.email,
+        deliveryAddress: orderData.delivery ? orderData.delivery.address : '',
+        deliveryApartment: orderData.delivery ? orderData.delivery.apartment : '',
+        deliveryCity: orderData.delivery ? orderData.delivery.city : '',
+        deliveryZip: orderData.delivery ? orderData.delivery.zipCode : '',
+        promoCode: orderData.promoCode || '',
+        promoDiscount: orderData.promoDiscount || 0,
+        tipPercentage: orderData.tipPercentage || 0,
+        tipAmount: orderData.tipAmount || 0,
+        subtotal: orderData.subtotal || 0,
+        total: orderData.total || 0,
+        status: orderData.status || 'confirmed',
+        createdAt: orderData.createdAt,
+        // Store items as a JSON string so Apps Script can parse it
+        itemsJson: JSON.stringify(orderData.items || [])
+    };
+
+    try {
+        fetch(GOOGLE_SHEET_WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        }).catch(err => {
+            console.error('Failed to send order to Google Sheets', err);
+        });
+    } catch (err) {
+        console.error('Failed to send order to Google Sheets', err);
+    }
 }
 
 function saveOrder(orderData) {
@@ -2580,7 +2575,7 @@ function showOrderConfirmation(orderData) {
         if (confirmEstimatedTime) {
             confirmEstimatedTime.textContent = orderType === 'delivery' ? '30-45 minutes' : '15-20 minutes';
         }
-        if (confirmTotal) confirmTotal.textContent = `$${orderData.total.toFixed(2)}`;
+        if (confirmTotal) confirmTotal.textContent = `${orderData.total.toFixed(2)}`;
         if (confirmEmailAddress) confirmEmailAddress.textContent = orderData.customer.email;
 
         // Update delivery animation
@@ -2635,53 +2630,6 @@ function simulateOrderTracking() {
     }, 3000);
 }
 
-/* ============================================
-   INTEGRATION WITH MENU ADD TO CART
-   ============================================ */
-// Override the existing addItemToCart function to work with ordering system
-function addItemToCartFromMenu(id, name, price, quantity = 1) {
-    // Get image from menu data or use default
-    const menuCard = document.querySelector(`.menu-card .add-to-cart-btn[data-id="${id}"]`);
-    let image = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200';
-
-    if (menuCard) {
-        const cardImage = menuCard.closest('.menu-card').querySelector('.menu-card-image img');
-        if (cardImage) {
-            image = cardImage.src;
-        }
-    }
-
-    addToOrderCart(id, name, price, image, quantity);
-}
-
-// Update existing add-to-cart buttons to use the new system
-document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-    btn.addEventListener('click', function (e) {
-        e.preventDefault();
-
-        const id = this.dataset.id;
-        const name = this.dataset.name;
-        const price = parseFloat(this.dataset.price);
-
-        // Get image
-        const menuCard = this.closest('.menu-card');
-        let image = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200';
-        if (menuCard) {
-            const cardImage = menuCard.querySelector('.menu-card-image img');
-            if (cardImage) {
-                image = cardImage.src;
-            }
-        }
-
-        addToOrderCart(id, name, price, image, 1);
-
-        // Button animation
-        this.classList.add('added');
-        setTimeout(() => {
-            this.classList.remove('added');
-        }, 2000);
-    });
-});
 /* ============================================
    REVIEWS SECTION
    ============================================ */
